@@ -1,0 +1,183 @@
+import json
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+
+# ---------------------------
+# 1️⃣ OAuth2 ayarları
+# ---------------------------
+SCOPES = ['https://www.googleapis.com/auth/forms.body']
+flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES)
+creds = flow.run_local_server(port=0)
+
+service = build('forms', 'v1', credentials=creds)
+
+# ---------------------------
+# 2️⃣ Form başlığı ile oluştur
+# ---------------------------
+form = {
+    "info": {
+        "title": "AI Shopping Research Survey"
+    }
+}
+result = service.forms().create(body=form).execute()
+form_id = result['formId']
+print("Form created! ID:", form_id)
+
+# ---------------------------
+# 3️⃣ Sorular (batchUpdate)
+# ---------------------------
+questions = [
+    {
+        "createItem": {
+            "item": {
+                "title": "Have you ever used AI shopping assistant at websites for shopping?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "choiceQuestion": {
+                            "type": "RADIO",
+                            "options": [
+                                {"value": "Yes"},
+                                {"value": "No"},
+                                {"value": "Sometimes"}
+                            ],
+                            "shuffle": False
+                        }
+                    }
+                }
+            },
+            "location": {"index": 0}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "When you shop online, how do you usually search for a product you want (chat, filters, reviews, etc.)?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 1}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "Can you describe a recent time when it was difficult to find the right product? What happened? How did you eventually solve it?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 2}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "How often do you use the search bar vs browsing through categories or filters? Why do you prefer that method?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 3}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "Have you ever used a chatbot or AI assistant while shopping? How was that experience, and what could have made it better?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 4}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "If you could 'talk' to the website — e.g., ask 'Show me comfy sneakers under €100' — would that feel useful or unnecessary? Why?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 5}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "What would make you not want to use such a conversational AI feature?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 6}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "Would you trust an AI shopping assistant to give you good results? What factors make you trust or doubt it?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 7}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "If a website had this AI search assistant, what would make you want to use it regularly instead of the traditional search bar and filters?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 8}
+        }
+    },
+    {
+        "createItem": {
+            "item": {
+                "title": "Some websites already have advanced AI tools, but most users still don’t use them. Why do you think that happens?",
+                "questionItem": {
+                    "question": {
+                        "required": True,
+                        "textQuestion": {}
+                    }
+                }
+            },
+            "location": {"index": 9}
+        }
+    }
+]
+
+service.forms().batchUpdate(formId=form_id, body={"requests": questions}).execute()
+print("All questions added!")
+print(f"Form link: https://docs.google.com/forms/d/{form_id}/viewform")
